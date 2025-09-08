@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-// FIX: Removed unused import from `firebase/auth` as we now use compat library method.
+// FIX: Removed unused imports from `firebase/auth` as we now use compat library methods.
 import { auth } from '../../firebase';
 import Icon from '../shared/Icon';
 
-interface LoginScreenProps {
-  onSwitchToRegister: () => void;
+interface RegisterScreenProps {
+  onSwitchToLogin: () => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ onSwitchToLogin }) => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -18,16 +19,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
     setError(null);
     setLoading(true);
     try {
-      // FIX: Switched to firebase compat method `auth.signInWithEmailAndPassword`.
-      await auth.signInWithEmailAndPassword(email, password);
-      // User will be redirected by onAuthStateChanged listener in App.tsx
-    } catch (err: any) {
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-        setError('Invalid email or password. Please try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again later.');
+      // FIX: Switched to firebase compat method `auth.createUserWithEmailAndPassword`.
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      // Set the user's display name
+      if (userCredential.user) {
+        // FIX: Switched to firebase compat method `user.updateProfile`.
+        await userCredential.user.updateProfile({ displayName: name });
       }
-      console.error(err);
+      // User will be automatically logged in by onAuthStateChanged listener in App.tsx
+    } catch (err: any) {
+      setError(err.message);
     } finally {
         setLoading(false);
     }
@@ -40,13 +41,27 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
           <div className="bg-primary p-3 rounded-full text-white mb-3">
             <Icon name="Wallet" size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-text-primary">FinTrack Pro</h1>
-          <p className="text-text-secondary mt-1">Welcome back! Please login to your account.</p>
+          <h1 className="text-3xl font-bold text-text-primary">Create Account</h1>
+          <p className="text-text-secondary mt-1">Get started with FinTrack Pro.</p>
         </div>
         
         {error && <p className="bg-red-100 text-red-700 p-3 rounded-md text-center mb-4">{error}</p>}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="name" className="text-sm font-medium text-text-secondary">Full Name</label>
+            <div className="mt-1 relative rounded-md shadow-sm">
+               <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Alex Doe"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                required
+              />
+            </div>
+          </div>
           <div>
             <label htmlFor="email" className="text-sm font-medium text-text-secondary">Email</label>
             <div className="mt-1 relative rounded-md shadow-sm">
@@ -70,7 +85,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="6+ characters"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                 required
               />
@@ -78,13 +93,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
           </div>
           
           <button type="submit" disabled={loading} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out disabled:opacity-50">
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-text-secondary">
-          Don't have an account?{' '}
-          <button onClick={onSwitchToRegister} className="font-medium text-primary hover:underline">
-            Sign Up
+         <p className="mt-6 text-center text-sm text-text-secondary">
+          Already have an account?{' '}
+          <button onClick={onSwitchToLogin} className="font-medium text-primary hover:underline">
+            Login
           </button>
         </p>
       </div>
@@ -92,4 +107,4 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onSwitchToRegister }) => {
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;

@@ -65,7 +65,7 @@ export type BudgetFormData = Omit<Budget, 'id' | 'userId'>;
 
 
 export interface User {
-  id: string;
+  id: string; // Corresponds to Firebase UID
   name: string;
   email: string;
 }

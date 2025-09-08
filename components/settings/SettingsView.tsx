@@ -1,5 +1,6 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+// FIX: Removed unused import from `firebase/auth` as we now use compat library method.
+import { auth } from '../../firebase';
 import type { User } from '../../types';
 import Button from '../shared/Button';
 import Icon from '../shared/Icon';
@@ -18,6 +19,21 @@ const SettingsCard: React.FC<React.PropsWithChildren<{ title: string }>> = ({ ti
 );
 
 const SettingsView: React.FC<SettingsViewProps> = ({ currentUser }) => {
+  const [resetSent, setResetSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePasswordReset = async () => {
+    setError(null);
+    setResetSent(false);
+    try {
+      // FIX: Switched to firebase compat method `auth.sendPasswordResetEmail`.
+      await auth.sendPasswordResetEmail(currentUser.email);
+      setResetSent(true);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold text-text-primary">Settings</h2>
@@ -34,7 +50,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ currentUser }) => {
                     <p className="text-text-secondary">{currentUser.email}</p>
                 </div>
             </div>
-             <Button className="w-auto" variant="secondary">Edit Profile</Button>
+             <Button className="w-auto" variant="secondary" disabled>Edit Profile</Button>
         </SettingsCard>
 
         <SettingsCard title="Security">
@@ -42,15 +58,18 @@ const SettingsView: React.FC<SettingsViewProps> = ({ currentUser }) => {
                 <label className="block text-sm font-medium text-text-secondary">Password</label>
                 <div className="flex items-center justify-between mt-1">
                     <p>************</p>
-                    <Button className="w-auto" variant="secondary">Change Password</Button>
+                    <Button className="w-auto" variant="secondary" onClick={handlePasswordReset}>Send Password Reset Email</Button>
                 </div>
+                 {resetSent && <p className="text-sm text-green-600 mt-2">Password reset email sent to {currentUser.email}.</p>}
+                 {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
             </div>
              <div>
                 <label className="block text-sm font-medium text-text-secondary">Two-Factor Authentication</label>
                  <div className="flex items-center justify-between mt-1">
                     <p className="text-text-secondary">Not enabled</p>
-                    <Button className="w-auto" variant="secondary">Enable 2FA</Button>
+                    <Button className="w-auto" variant="secondary" disabled>Enable 2FA</Button>
                 </div>
+                <p className="text-xs text-text-secondary mt-1">2FA support is coming soon!</p>
             </div>
         </SettingsCard>
         
@@ -83,7 +102,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ currentUser }) => {
                     <p className="font-bold text-red-800">Delete Account</p>
                     <p className="text-sm text-red-700">Permanently delete your account and all associated data. This action is irreversible.</p>
                 </div>
-                <Button variant="danger" className="w-auto">Delete My Account</Button>
+                <Button variant="danger" className="w-auto" disabled>Delete My Account</Button>
              </div>
          </SettingsCard>
     </div>
