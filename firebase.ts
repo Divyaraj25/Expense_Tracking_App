@@ -6,13 +6,13 @@ import 'firebase/compat/firestore';
 // IMPORTANT: Replace this with your own Firebase project's configuration.
 // You can find this in your Firebase project settings.
 const firebaseConfig = {
-  apiKey: "AIzaSyAItzEsdqp4twqjLeUpouXj_7lzWeo5Srw",
-  authDomain: "expense-tracking-app-1d503.firebaseapp.com",
-  projectId: "expense-tracking-app-1d503",
-  storageBucket: "expense-tracking-app-1d503.firebasestorage.app",
-  messagingSenderId: "254572784778",
-  appId: "1:254572784778:web:5ff06ff06c4ba46bfcd173",
-  measurementId: "G-4NW7GQ2R4K"
+  apiKey: "APIKEY",
+  authDomain: "AUTHDOMAIN",
+  projectId: "PROJECTID",
+  storageBucket: "STORAGEBUCKET",
+  messagingSenderId: "MESSAGINGSENDERID",
+  appId: "APPID",
+  measurementId: "MEASUREMENTID"
 };
 
 // Initialize Firebase
